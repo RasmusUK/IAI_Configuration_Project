@@ -62,14 +62,15 @@ public class ChessAI25 implements IQueensLogic{
             }
             if(bdd == null) bdd = bddTemp;
             else bdd = bdd.and(bddTemp);
-        }*/
-/*
+        }
+
+        */
+
+
         for (int i = 0; i < size; i++) {
-            BDD bddTemp = null;
             for (int j = 0; j < size; j++) {
                 BDD var = bdds[i][j];
-                Set<BDD> allBDDS = new HashSet<>();
-                allBDDS.add(var);
+                ArrayList<BDD> allBDDS = new ArrayList<>();
                 int iTemp = i;
                 int jTemp = j;
                 while(true){
@@ -105,25 +106,21 @@ public class ChessAI25 implements IQueensLogic{
                     if(iTemp >= size || jTemp < 0) break;
                     allBDDS.add(bdds[iTemp][jTemp]);
                 }
-                BDD BDDnew = null;
-                for (var bddLocal: allBDDS) {
-
-                    for (var bddNext: allBDDS) {
-                        if(bddLocal == bddNext) continue;
-                        bddLocal.and(bddNext.not());
-                    }
-                    if(BDDnew == null) BDDnew = bddLocal;
-                    else BDDnew.or(bddLocal);
+                BDD temp = null;
+                for (BDD bdd: allBDDS) {
+                    if(temp == null) temp = bdd.not();
+                    else temp = temp.and(bdd.not());
                 }
+                var = var.imp(temp);
 
-                if(bddTemp == null) bddTemp = BDDnew;
-                else bddTemp = bddTemp.or(BDDnew);
+                System.out.println("---");
+                fact.printTable(var);
+                if(bdd == null) bdd = var;
+                else bdd = bdd.and(var);
             }
 
-            if(bdd == null) bdd = bddTemp;
-            else bdd = bdd.and(bddTemp);
-        }*/
-
+        }/*
+/*
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 BDD var = bdds[i][j];
@@ -155,7 +152,7 @@ public class ChessAI25 implements IQueensLogic{
                 }
                 bdd = var;
             }
-        }
+        }*/
     }
 
     @Override
