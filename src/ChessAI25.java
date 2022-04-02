@@ -29,43 +29,6 @@ public class ChessAI25 implements IQueensLogic{
         }
 
         bdd = null;
-        /*
-        for (int k = 0; k < size; k++) {
-            BDD bddTemp = null;
-            for (int i = 0; i < size; i++) {
-                BDD var = bdds[k][i];
-                for (int j = 0; j < size; j++) {
-                    if(i == j) continue;
-                    BDD local = bdds[k][j].not();
-                    var = var.and(local);
-                }
-                fact.printTable(var);
-                if(bddTemp == null) bddTemp = var;
-                else bddTemp = bddTemp.or(var);
-            }
-            if(bdd == null) bdd = bddTemp;
-            else bdd = bdd.and(bddTemp);
-        }
-
-        for (int k = 0; k < size; k++) {
-            BDD bddTemp = null;
-            for (int i = 0; i < size; i++) {
-                BDD var = bdds[i][k];
-                for (int j = 0; j < size; j++) {
-                    if(i == j) continue;
-                    BDD local = bdds[j][k].not();
-                    var = var.and(local);
-                }
-                fact.printTable(var);
-                if(bddTemp == null) bddTemp = var;
-                else bddTemp = bddTemp.or(var);
-            }
-            if(bdd == null) bdd = bddTemp;
-            else bdd = bdd.and(bddTemp);
-        }
-
-        */
-
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -106,6 +69,18 @@ public class ChessAI25 implements IQueensLogic{
                     if(iTemp >= size || jTemp < 0) break;
                     allBDDS.add(bdds[iTemp][jTemp]);
                 }
+
+                for (int k = 0; k < size; k++) {
+                    if(k == j) continue;
+                    allBDDS.add(bdds[i][k]);
+                }
+
+                for (int k = 0; k < size; k++) {
+                    if(k == i) continue;
+                    allBDDS.add(bdds[k][j]);
+                }
+
+
                 BDD temp = null;
                 for (BDD bdd: allBDDS) {
                     if(temp == null) temp = bdd.not();
@@ -113,46 +88,32 @@ public class ChessAI25 implements IQueensLogic{
                 }
                 var = var.imp(temp);
 
-                System.out.println("---");
-                fact.printTable(var);
                 if(bdd == null) bdd = var;
                 else bdd = bdd.and(var);
             }
+        }
 
-        }/*
-/*
         for (int i = 0; i < size; i++) {
+            BDD temp = null;
             for (int j = 0; j < size; j++) {
                 BDD var = bdds[i][j];
-                var min = Math.min(i,j);
-                var startcol = Math.max(0,i-min);
-                var startrow = Math.max(0,j-min);
-                System.out.println("min: " + min + "\ncol: " + startcol +"\nstartrow: "+ startrow);
-                while(startrow < (size -1) || startcol < (size -1)){
-                    if(startcol <= size - 1 && startrow <= size -1) {
-                        if (startcol != i || startrow != j) {
-                            BDD local = bdds[startcol][startrow].not();
-                            var = var.and(local);
-                        }
-                    }
-                    startcol++;
-                    startrow++;
-                }
-                startcol = i + j;
-                startrow = 0;
-                while (startcol > -1){
-                    if(startcol <= size - 1 && startrow <= size -1){
-                        if(startcol != i || startrow != j){
-                            BDD local = bdds[startcol][startrow].not();
-                            var = var.and(local);
-                        }
-                    }
-                    startcol--;
-                    startrow++;
-                }
-                bdd = var;
+                if(temp == null) temp = var;
+                else temp = temp.or(var);
             }
-        }*/
+            if(bdd == null) bdd = temp;
+            else bdd = bdd.and(temp);
+        }
+
+        for (int i = 0; i < size; i++) {
+            BDD temp = null;
+            for (int j = 0; j < size; j++) {
+                BDD var = bdds[j][i];
+                if(temp == null) temp = var;
+                else temp = temp.or(var);
+            }
+            bdd = bdd.and(temp);
+        }
+        updateBoard();
     }
 
     @Override
@@ -163,13 +124,17 @@ public class ChessAI25 implements IQueensLogic{
     @Override
     public void insertQueen(int column, int row) {
         board[column][row] = 1;
-        bdd = restrict(column,row);
+        bdd = restrictTrue(column,row);
         updateBoard();
     }
 
-    private BDD restrict(int column, int row){
+    private BDD restrictTrue(int column, int row){
         int var = column * size + row;
         return bdd.restrict(fact.ithVar(var));
+    }
+    private BDD restrictFalse(int column, int row){
+        int var = column * size + row;
+        return bdd.restrict(fact.nithVar(var));
     }
 
     private void updateBoard(){
@@ -182,9 +147,10 @@ public class ChessAI25 implements IQueensLogic{
         }
     }
     private int getUpdatedStatus(int i, int j){
-        var temp = restrict(i,j);
-        if(temp.isZero()) return -1;
-        if(temp.isOne()) return 1;
+        var temp = restrictTrue(i,j);
+        if(temp.isZero())return -1;
+        temp = restrictFalse(i,j);
+        if(temp.isZero()) return 1;
         return 0;
     }
 }
