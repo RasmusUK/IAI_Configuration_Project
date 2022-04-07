@@ -4,7 +4,7 @@ import net.sf.javabdd.JFactory;
 
 import java.util.*;
 
-public class ChessAI25 implements IQueensLogic{
+public class QueenAI25 implements IQueensLogic{
     private int size;
     private int board[][];
     private BDD[][] bdds;
