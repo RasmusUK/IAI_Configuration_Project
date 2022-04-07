@@ -6,7 +6,7 @@ import java.util.*;
 
 public class QueenAI25 implements IQueensLogic{
     private int size;
-    private int board[][];
+    private int[][] board;
     private BDD[][] bdds;
     private BDDFactory fact;
     private BDD bdd;
